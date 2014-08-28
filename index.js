@@ -1,20 +1,34 @@
-function extendWithFile(key, name) {
-    var file = require(this.requirePath + this.json[key].file);
-    this.json[name] = file;
+var _ = require('underscore');
+
+function extendWithFile(key, name, parent) {
+    var file;
+    try {
+        file = require(this.requirePath + parent[key].file);
+        parent[name] = file;
+        delete parent[key];
+    }catch(e) {
+        return this.callback(e);
+    }
 }
 
-function extendWithFunction(key, name) {
-    var lib = require(this.requirePath + this.json[key].function).bind(this);
-    lib(key, name);
+function extendWithFunction(key, name, parent) {
+    var lib;
+    try {
+        lib = require(this.requirePath + parent[key].function).bind(this);
+    }catch(e){
+        return this.callback(e);
+    }
+
+    lib(key, name, parent);
 }
 
 function respondWithJSON(callback) {
     switch (this.inputJSON) {
     case 'string':
-        callback(JSON.stringify(this.json));
+        callback(null, JSON.stringify(this.json));
         break;
     case 'object':
-        callback(this.json);
+        callback(null, this.json);
         break;
     }
 }
@@ -27,36 +41,44 @@ function setUpJSON (json) {
         break;
     case 'object':
         this.inputJSON = 'object';
-        this.json = json;
+        this.json = _.clone(json);
         break;
     }
 }
 
-module.exports = function (json, path, callback) {
-    this.inputJSON;
-    this.requirePath = path;
+module.exports = function (json, options, callback) {
+    this.json;
+    this.requirePath = options.path;
+    this.callback = callback;
 
     setUpJSON(json);
 
-    Object.keys(this.json)
-        .filter(function (key) {
-            return key.indexOf('>>') === 0;
-        })
-        .forEach(function (extendor) {
-            var name = extendor.replace('>>', '');
+    function iterate (array, parent) {
+        array
+            .forEach(function (key) {
+                if (typeof parent[key] === 'object' && key.indexOf(options.pointer) !== 0) {
+                    iterate(Object.keys(parent[key]), parent[key]);
+                }
 
-            if (this.json[extendor].file) {
-                extendWithFile(extendor, name);
-                delete this.json[extendor];
-                return;
-            }
+                if (key.indexOf(options.pointer) !== 0) {
+                    return;
+                }
 
-            if (this.json[extendor].function) {
-                extendWithFunction(extendor, name);
-                delete this.json[extendor];
-                return;
-            }
-        });
+                var name = key.replace(options.pointer, '');
+
+                if (parent[key].file) {
+                    return extendWithFile(key, name, parent);
+                }
+
+                if (parent[key].function) {
+                    extendWithFunction(key, name, parent);
+                    delete parent[key];
+                    return;
+                }
+            });
+    }
+
+    iterate(Object.keys(this.json), this.json);
 
     respondWithJSON(callback);
 };
