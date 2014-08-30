@@ -56,7 +56,7 @@ module.exports = function (json, options, callback) {
     function iterate (array, parent) {
         array
             .forEach(function (key) {
-                if (typeof parent[key] === 'object' && key.indexOf(options.pointer) !== 0) {
+                if (typeof parent[key] === 'object' && key.indexOf(options.pointer) !== 0 && parent[key] !== null) {
                     iterate(Object.keys(parent[key]), parent[key]);
                 }
 
