@@ -9,6 +9,7 @@
   "scripts": {
     "test": "grunt test"
   },
+  "repository": "https://github.com/wmonk/extend-json",
   "author": "William Monk",
   "license": "ISC",
   "devDependencies": {
