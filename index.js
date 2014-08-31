@@ -47,7 +47,6 @@ function setUpJSON (json) {
 }
 
 module.exports = function (json, options, callback) {
-    this.json;
     this.requirePath = options.path;
     this.callback = callback;
 
@@ -56,7 +55,7 @@ module.exports = function (json, options, callback) {
     function iterate (array, parent) {
         array
             .forEach(function (key) {
-                if (typeof parent[key] === 'object' && key.indexOf(options.pointer) !== 0 && parent[key] !== null) {
+                if (_.isObject(parent[key]) && !_.isString(parent[key])) {
                     iterate(Object.keys(parent[key]), parent[key]);
                 }
 

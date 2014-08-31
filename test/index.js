@@ -169,4 +169,21 @@ describe('extend JSON', function () {
             done();
         });
     });
+
+    it('should only iterate on valid objects, not null or undefined values', function(done) {
+        extend({
+            "header": null,
+            "footer": undefined
+        }, {
+            path: '../',
+            pointer: '**'
+        }, function (err, json) {
+            json.should.deep.equal({
+                'header': null,
+                'footer': undefined
+            });
+
+            done();
+        });
+    });
 });
