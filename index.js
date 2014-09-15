@@ -1,9 +1,10 @@
 var _ = require('underscore');
+var path = require('path');
 
 function extendWithFile(key, name, parent) {
     var file;
     try {
-        file = require(this.requirePath + parent[key].file);
+        file = require(path.join(this.requirePath, parent[key].file));
         parent[name] = file;
         delete parent[key];
     }catch(e) {
@@ -14,7 +15,7 @@ function extendWithFile(key, name, parent) {
 function extendWithFunction(key, name, parent) {
     var lib;
     try {
-        lib = require(this.requirePath + parent[key].function).bind(this);
+        lib = require(path.join(this.requirePath, parent[key].function)).bind(this);
     }catch(e){
         return this.callback(e);
     }
@@ -47,6 +48,11 @@ function setUpJSON (json) {
 }
 
 module.exports = function (json, options, callback) {
+    options = _.defaults(options, {
+        pointer: '>>',
+        path: ''
+    });
+
     this.requirePath = options.path;
     this.callback = callback;
 

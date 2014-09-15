@@ -1,5 +1,5 @@
 var proxyquire = require('proxyquire').noCallThru();
-require('chai').should();
+var should = require('chai').should();
 var extend;
 var options = {
     path: '../',
@@ -181,6 +181,32 @@ describe('extend JSON', function () {
             json.should.deep.equal({
                 'header': null,
                 'footer': undefined
+            });
+
+            done();
+        });
+    });
+
+    it('should normalize all user provided paths', function (done) {
+        extend({
+            '>>header': {
+                'file': 'header'
+            },
+            'content': {
+                'hello': 'world'
+            }
+        }, {
+            path: '..',
+            pointer: '>>'
+        }, function (err, json) {
+            should.not.exist(err);
+            json.should.deep.equal({
+                'header': {
+                    'foo': 'bar'
+                },
+                'content': {
+                    'hello': 'world'
+                }
             });
 
             done();
