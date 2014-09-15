@@ -48,6 +48,11 @@ function setUpJSON (json) {
 }
 
 module.exports = function (json, options, callback) {
+    options = _.defaults(options, {
+        pointer: '>>',
+        path: ''
+    });
+
     this.requirePath = options.path;
     this.callback = callback;
 
