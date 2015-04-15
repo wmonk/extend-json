@@ -4,16 +4,16 @@ var extendJSON;
 
 describe('JSON extendor', function () {
 
-    it('should allow the JSON to be extended with a file (with top level key i.e slot)', function (done) {
+    it('should allow object in JSON to be extended with a file', function (done) {
         var fileA = {
             'slot1': 'val1',
-            '>>fileB': 'fileB.json'
+            '>>slot2': {
+                'file': 'fileB.json'
+            }
         };
 
         var fileB = {
-            'slot2': {
-                'config': 'items'
-            }
+            'config': 'items'
         };
         extendJSON = proxyquire('./index', {
             'fileB.json': fileB
@@ -29,13 +29,16 @@ describe('JSON extendor', function () {
         }).catch(done);
     });
 
-    it('should allow the JSON to be extended with a file (with no keys i.e component)', function (done) {
+    it('should allow array in JSON to be extended with a file', function (done) {
         var fileA = {
             'slot1': {
                 'components': [{
                     'type': 'identity'
                 }, {
-                    '<<fileC': 'fileC.json'
+                    '<<fileC': {
+                        'file': 'fileC.json',
+                        'replace': true
+                    }
                 }]
             }
         };
@@ -46,7 +49,9 @@ describe('JSON extendor', function () {
         extendJSON = proxyquire('./index', {
             'fileC.json': fileC
         });
-        extendJSON(fileA, {pointer:'<<'}).then(function (json) {
+        extendJSON(fileA, {
+            pointer: '<<'
+        }).then(function (json) {
             json.should.deep.equal({
                 'slot1': {
                     'components': [{
@@ -60,15 +65,73 @@ describe('JSON extendor', function () {
         }).catch(done);
     });
 
+    it('should allow object and array in JSON to be extended with a file', function (done) {
+        var fileA = {
+            'slot1': 'val1',
+            '<<slot2': {
+                'file': 'fileB.json'
+            },
+            'slot3': {
+                'components': [{
+                    'type': 'identity'
+                }, {
+                    '<<fileC': {
+                        'file': 'fileC.json',
+                        'replace': true
+                    }
+                }, {
+                    'type': 'callcenter'
+                }]
+            }
+        };
+
+        var fileB = {
+            'config': 'items'
+        };
+
+        var fileC = {
+            'type': 'personalisation'
+        };
+        extendJSON = proxyquire('./index', {
+            'fileB.json': fileB,
+            'fileC.json': fileC
+        });
+
+        extendJSON(fileA, {
+            pointer: '<<'
+        }).then(function (json) {
+            json.should.deep.equal({
+                'slot1': 'val1',
+                'slot2': {
+                    'config': 'items'
+                },
+                'slot3': {
+                    'components': [{
+                        'type': 'identity'
+                    }, {
+                        'type': 'personalisation'
+                    }, {
+                        'type': 'callcenter'
+                    }]
+                }
+            });
+            done();
+        }).catch(done);
+    });
+
     it('should catch if file is not found', function (done) {
         var fileA = {
             'slot1': 'val1',
-            '<<fileX': 'fileX.json'
+            '<<fileX': {
+                'file': 'fileX.json'
+            }
         };
 
         var fileX = {};
         extendJSON = require('./index');
-        extendJSON(fileA, {pointer:'<<'}).catch(function (err) {
+        extendJSON(fileA, {
+            pointer: '<<'
+        }).catch(function (err) {
             err.toString().should.contain('Cannot find module');
             err.toString().should.contain('fileX');
             done();

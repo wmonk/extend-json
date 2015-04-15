@@ -2,22 +2,40 @@ var Promise = require('bluebird');
 var path = require('path');
 var _ = require('lodash');
 
-function extendJson(json, options) {
+var array = [];
+
+function findPointer(json, options) {
+    if (_.isArray(json)) {
+        array = json;
+    }
+
     Object.keys(json).map(function (key) {
-        if (typeof json[key] === 'object') {
-            return extendJson(json[key], options);
+        if (typeof json[key] === 'object' && key.indexOf(options.pointer) === -1) {
+            return findPointer(json[key], options);
         }
 
         if (key.indexOf(options.pointer) !== -1) {
-            var extendedJson = require(path.join(options.path, json[key]));
-            newKey = Object.keys(extendedJson)[0];
-            json[newKey] = extendedJson[newKey];
-            delete json[key];
+            extendJson(json, key, array, options);
         }
     });
 
     return json;
 }
+
+function extendJson(json, key, jsonArray, options) {
+    var extendedJson = require(path.join(options.path, json[key].file));
+
+    if (json[key].replace) {
+        var arrayIndex = _.findIndex(jsonArray, json);
+        jsonArray[arrayIndex] = extendedJson;
+    } else {
+        var newKey = key.replace(options.pointer, '');
+        json[newKey] = extendedJson;
+        delete json[key];
+    }
+}
+
+
 
 module.exports = function (json, options) {
     if (!options) {
@@ -30,6 +48,6 @@ module.exports = function (json, options) {
     });
 
     return Promise.try(function () {
-        return extendJson(json, options);
+        return findPointer(json, options);
     });
 };
