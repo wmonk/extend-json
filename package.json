@@ -1,6 +1,6 @@
 {
   "name": "extend-json",
-  "version": "1.0.0",
+  "version": "1.5.2",
   "description": "This module will allow you to extend a JSON file with either a function or another JSON file. This is to allow inheritance, as well as to enforce DRY principles.",
   "main": "index.js",
   "scripts": {

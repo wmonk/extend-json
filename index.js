@@ -10,7 +10,7 @@ function findPointer(json, options) {
     }
 
     Object.keys(json).map(function (key) {
-        if (typeof json[key] === 'object' && key.indexOf(options.pointer) === -1) {
+        if (typeof json[key] === 'object' && json[key] !== null && key.indexOf(options.pointer) === -1) {
             return findPointer(json[key], options);
         }
 
