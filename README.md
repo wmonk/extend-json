@@ -2,9 +2,14 @@ extend-json ![Build status](https://travis-ci.org/wmonk/extend-json.svg?branch=m
 ===========
 
 `extend-json` is a npm module for populating JSON files, with other JSON files or a specified function.<br/>
-Looks for pointer key with a path value. Keys need to be unique.
+
+to extend Objects
 ```
-">>fileB": "./fileB.json"
+">>fileB": {"file" : "./fileB.json"}
+```
+to extend Arrays
+```
+[{">>fileB": {"file" : "./fileB.json", "replace":true}}]
 ```
 
 ```
