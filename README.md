@@ -13,7 +13,6 @@ to extend Arrays
 ```
 
 ```
-var Promise = require('bluebird');
 var extendJSON = require('./index');
 var fileA = require('./fileA.json');
 

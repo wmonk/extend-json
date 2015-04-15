@@ -13,8 +13,7 @@ describe('JSON extendor', function () {
         };
 
         var fileB = {
-            "hotelUnavailable": "Unfortunately this hotel is not currently available for bookings. Please check back at a later date or try a new search to see alternative hotels.",
-            "serviceUnavailable": "Sorry there seems to be a problem with this page. Please use the back button in your browser and try again."
+            'config': 'items'
         };
 
         extendJSON = proxyquire('./index', {
@@ -24,9 +23,8 @@ describe('JSON extendor', function () {
             json.should.deep.equal({
                 'slot1': 'val1',
                 'slot2': {
-            "hotelUnavailable": "Unfortunately this hotel is not currently available for bookings. Please check back at a later date or try a new search to see alternative hotels.",
-            "serviceUnavailable": "Sorry there seems to be a problem with this page. Please use the back button in your browser and try again."
-        }
+                    'config': 'items'
+                }
             });
             done();
         }).catch(done);
